@@ -18,13 +18,15 @@ const LOOKBACK_MIN = 10
 const MISSED_AFTER_MIN = 30
 
 Deno.serve(async (req) => {
-  // Only the service role (pg_cron) may invoke this.
-  const auth = req.headers.get('Authorization') ?? ''
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  if (auth !== `Bearer ${serviceKey}`) {
+  // Only the service role (pg_cron) may invoke this. The gateway has already
+  // verified the JWT signature (verify_jwt); authorize on the role claim
+  // rather than byte-equality with the env key, which breaks across key
+  // rotations/re-signings.
+  if (!isServiceRole(req.headers.get('Authorization') ?? '')) {
     return new Response('Unauthorized', { status: 401 })
   }
 
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey)
 
   const { data: users, error } = await supabase
@@ -362,6 +364,21 @@ async function deliver(
     .eq('user_id', u.user_id)
     .eq('dedupe_key', msg.dedupeKey)
   return result.ok
+}
+
+/** Signature is gateway-verified; we only need to check the role claim. */
+function isServiceRole(authHeader: string): boolean {
+  const token = authHeader.replace(/^Bearer\s+/i, '')
+  const parts = token.split('.')
+  if (parts.length !== 3) return false
+  try {
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+    )
+    return payload?.role === 'service_role'
+  } catch {
+    return false
+  }
 }
 
 function json(payload: unknown, status = 200): Response {
