@@ -24,14 +24,6 @@ export async function signIn(email: string, password: string): Promise<void> {
   if (error) throw error
 }
 
-export async function signInWithMagicLink(email: string): Promise<void> {
-  const { error } = await getSupabase().auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: appRedirectUrl() },
-  })
-  if (error) throw error
-}
-
 export async function signOut(): Promise<void> {
   await syncEngine.stop()
   await getSupabase().auth.signOut()
