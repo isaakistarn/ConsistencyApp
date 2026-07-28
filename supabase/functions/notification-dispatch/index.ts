@@ -5,7 +5,9 @@
 // notification_log (unique user_id + dedupe_key).
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { RRule } from 'npm:rrule@2'
+// esm.sh build: the raw npm package fails to boot in the Deno edge runtime
+// (CJS interop), esm.sh serves a proper ESM bundle.
+import { RRule } from 'https://esm.sh/rrule@2.8.1'
 import { esc, sendTelegramMessage } from '../_shared/telegram.ts'
 
 type Supabase = ReturnType<typeof createClient>
