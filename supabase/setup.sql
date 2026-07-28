@@ -1,7 +1,33 @@
-﻿-- Consistency — one-shot database setup
+﻿-- Consistency — one-shot database setup (idempotent)
 -- Paste this entire file into the Supabase SQL Editor and click Run.
--- (Telegram scheduled notifications need one extra migration + edge functions; see README.)
+-- Safe to re-run: the section below clears any previous Consistency
+-- objects (tables, types, functions, triggers) before rebuilding.
 
+-- ============================================================
+-- Clean slate — remove any prior Consistency objects
+-- ============================================================
+drop trigger if exists on_auth_user_created on auth.users;
+
+drop table if exists public.activity_logs cascade;
+drop table if exists public.sync_queue cascade;
+drop table if exists public.notification_log cascade;
+drop table if exists public.telegram_settings cascade;
+drop table if exists public.daily_statistics cascade;
+drop table if exists public.completion_logs cascade;
+drop table if exists public.reminder_occurrences cascade;
+drop table if exists public.reminders cascade;
+drop table if exists public.time_blocks cascade;
+drop table if exists public.categories cascade;
+drop table if exists public.user_preferences cascade;
+drop table if exists public.profiles cascade;
+
+drop function if exists public.handle_new_user() cascade;
+drop function if exists public.set_updated_at() cascade;
+drop function if exists public.is_owner(uuid) cascade;
+
+drop type if exists public.completion_action cascade;
+drop type if exists public.occurrence_status cascade;
+drop type if exists public.reminder_priority cascade;
 -- ============================================================
 -- 20260728000001_schema.sql
 -- ============================================================
