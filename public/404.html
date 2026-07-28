@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Consistency</title>
+    <script>
+      // GitHub Pages serves this for unknown paths. Remember the requested URL,
+      // then bounce to the app root; index.html restores it via history.replaceState.
+      var segments = location.pathname.split('/')
+      // Project pages live under /<repo>/ — keep the first path segment as base.
+      var base = segments.length > 1 && segments[1] ? '/' + segments[1] + '/' : '/'
+      sessionStorage.setItem(
+        'spa:redirect',
+        location.pathname + location.search + location.hash
+      )
+      location.replace(base)
+    </script>
+  </head>
+  <body></body>
+</html>

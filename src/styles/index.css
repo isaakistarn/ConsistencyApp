@@ -1,0 +1,276 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens — "dusk & sunrise" wellness palette, dark-first.
+   Dark neutrals are a warm plum ink (not gray); light mode is warm cream.
+   Accent palettes swap --primary at runtime via [data-accent] on <html>.
+--------------------------------------------------------------------------- */
+:root {
+  --background: oklch(0.975 0.008 78);
+  --foreground: oklch(0.28 0.025 310);
+  --card: oklch(0.995 0.004 84);
+  --card-foreground: oklch(0.28 0.025 310);
+  --popover: oklch(0.995 0.004 84);
+  --popover-foreground: oklch(0.28 0.025 310);
+  --primary: oklch(0.7 0.15 35);
+  --primary-foreground: oklch(0.99 0.01 60);
+  --secondary: oklch(0.94 0.012 74);
+  --secondary-foreground: oklch(0.33 0.025 310);
+  --muted: oklch(0.94 0.012 74);
+  --muted-foreground: oklch(0.53 0.025 305);
+  --accent: oklch(0.93 0.016 66);
+  --accent-foreground: oklch(0.33 0.025 310);
+  --destructive: oklch(0.62 0.2 22);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.905 0.014 74);
+  --input: oklch(0.885 0.016 74);
+  --ring: var(--primary);
+  --radius: 1rem;
+
+  --heat-0: oklch(0.915 0.012 74);
+  --heat-1: color-mix(in oklab, var(--primary) 25%, var(--heat-0));
+  --heat-2: color-mix(in oklab, var(--primary) 50%, var(--heat-0));
+  --heat-3: color-mix(in oklab, var(--primary) 75%, var(--heat-0));
+  --heat-4: var(--primary);
+
+  /* Fixed pastel tones for stat bubbles (stable across accent choices) */
+  --tone-coral: oklch(0.72 0.14 35);
+  --tone-honey: oklch(0.8 0.13 80);
+  --tone-sage: oklch(0.74 0.11 155);
+  --tone-sky: oklch(0.72 0.11 240);
+}
+
+.dark {
+  --background: oklch(0.185 0.018 315);
+  --foreground: oklch(0.94 0.012 68);
+  --card: oklch(0.225 0.02 315);
+  --card-foreground: oklch(0.94 0.012 68);
+  --popover: oklch(0.245 0.022 315);
+  --popover-foreground: oklch(0.94 0.012 68);
+  --primary: oklch(0.74 0.13 38);
+  --primary-foreground: oklch(0.22 0.05 30);
+  --secondary: oklch(0.28 0.022 315);
+  --secondary-foreground: oklch(0.92 0.01 68);
+  --muted: oklch(0.27 0.02 315);
+  --muted-foreground: oklch(0.68 0.02 310);
+  --accent: oklch(0.3 0.024 315);
+  --accent-foreground: oklch(0.92 0.01 68);
+  --destructive: oklch(0.68 0.18 22);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.29 0.022 315);
+  --input: oklch(0.33 0.024 315);
+  --ring: var(--primary);
+
+  --heat-0: oklch(0.265 0.02 315);
+
+  --tone-coral: oklch(0.76 0.13 38);
+  --tone-honey: oklch(0.82 0.12 82);
+  --tone-sage: oklch(0.77 0.1 155);
+  --tone-sky: oklch(0.75 0.1 240);
+}
+
+/* Accent presets — 'coral' is the default (set in the UI store) */
+[data-accent='coral'] {
+  --primary: oklch(0.72 0.14 35);
+  --primary-foreground: oklch(0.99 0.01 60);
+}
+.dark[data-accent='coral'] {
+  --primary: oklch(0.74 0.13 38);
+  --primary-foreground: oklch(0.22 0.05 30);
+}
+[data-accent='emerald'] {
+  --primary: oklch(0.72 0.12 158);
+  --primary-foreground: oklch(0.17 0.04 160);
+}
+[data-accent='blue'] {
+  --primary: oklch(0.72 0.14 255);
+  --primary-foreground: oklch(0.17 0.05 255);
+}
+[data-accent='violet'] {
+  --primary: oklch(0.71 0.15 292);
+  --primary-foreground: oklch(0.17 0.06 292);
+}
+[data-accent='rose'] {
+  --primary: oklch(0.71 0.17 13);
+  --primary-foreground: oklch(0.17 0.06 13);
+}
+[data-accent='amber'] {
+  --primary: oklch(0.83 0.14 83);
+  --primary-foreground: oklch(0.22 0.06 83);
+}
+[data-accent='cyan'] {
+  --primary: oklch(0.79 0.13 210);
+  --primary-foreground: oklch(0.19 0.05 210);
+}
+[data-accent='pink'] {
+  --primary: oklch(0.73 0.16 350);
+  --primary-foreground: oklch(0.18 0.06 350);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
+
+  --font-sans:
+    'Nunito Variable', 'Nunito', ui-rounded, ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scrollbar-color: color-mix(in oklab, var(--muted-foreground) 35%, transparent)
+      transparent;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-weight: 500; /* Nunito reads best a step heavier than regular */
+    overscroll-behavior-y: none;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-extrabold tracking-tight;
+  }
+  #root {
+    min-height: 100dvh;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+  :focus-visible {
+    @apply ring-ring ring-offset-background ring-2 ring-offset-2 outline-none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* iOS safe areas: the tab bar and sheets respect the home indicator. */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  .pt-safe {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   FullCalendar theme — align the calendar with the design system.
+--------------------------------------------------------------------------- */
+.fc {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: var(--muted);
+  --fc-today-bg-color: color-mix(in oklab, var(--primary) 7%, transparent);
+  --fc-now-indicator-color: var(--primary);
+  --fc-event-border-color: transparent;
+  font-size: 0.8125rem;
+}
+.fc .fc-toolbar {
+  display: none; /* we render our own toolbar */
+}
+.fc .fc-col-header-cell {
+  @apply text-muted-foreground border-0 py-2 text-[11px] font-medium tracking-wide uppercase;
+}
+.fc .fc-daygrid-day-number,
+.fc .fc-timegrid-slot-label {
+  @apply text-muted-foreground text-xs;
+}
+.fc .fc-day-today .fc-daygrid-day-number {
+  @apply bg-primary text-primary-foreground m-1 flex h-6 w-6 items-center justify-center rounded-full font-semibold;
+}
+.fc .fc-timegrid-slot {
+  height: 2.75rem;
+}
+.fc .fc-event {
+  @apply cursor-pointer rounded-md border-0 text-xs shadow-none;
+  padding: 1px 4px;
+}
+.fc .fc-event.occ-completed {
+  opacity: 0.45;
+}
+.fc .fc-event.occ-completed .fc-event-title {
+  text-decoration: line-through;
+}
+.fc .fc-event.occ-skipped {
+  opacity: 0.3;
+  filter: saturate(0.3);
+}
+.fc .fc-timegrid-now-indicator-line {
+  border-width: 1.5px;
+}
+.fc .fc-list {
+  border: 0;
+}
+.fc .fc-list-day-cushion {
+  @apply bg-muted/50;
+}
+.fc .fc-list-event:hover td {
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+.fc .fc-bg-event {
+  opacity: 0.14;
+}
+.fc .fc-bg-event .fc-event-title {
+  @apply text-foreground/70 text-[10px] font-medium not-italic;
+}
+.fc .fc-scrollgrid {
+  border-left: 0;
+  border-top: 0;
+}
+.fc .fc-daygrid-day-frame {
+  min-height: 3.5rem;
+}
