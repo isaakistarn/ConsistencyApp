@@ -34,8 +34,7 @@ Deno.serve(async (req) => {
     .select(
       `user_id, bot_token, chat_id, enabled, notify_reminders, notify_missed,
        morning_agenda, morning_agenda_time, evening_summary, evening_summary_time,
-       weekly_progress, weekly_progress_day,
-       profiles!inner ( timezone )`
+       weekly_progress, weekly_progress_day`
     )
     .eq('enabled', true)
     .neq('bot_token', '')
@@ -43,12 +42,24 @@ Deno.serve(async (req) => {
 
   if (error) return json({ ok: false, detail: error.message }, 500)
 
+  // Timezones live on profiles; both tables key off auth.users (no direct FK),
+  // so fetch them in one extra query instead of a PostgREST embed.
+  const userIds = (users ?? []).map((u) => u.user_id)
+  const timezones = new Map<string, string>()
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, timezone')
+      .in('id', userIds)
+    for (const p of profiles ?? []) timezones.set(p.id, p.timezone)
+  }
+
   const now = new Date()
   let sent = 0
 
   for (const u of users ?? []) {
     try {
-      sent += await processUser(supabase, u, now)
+      sent += await processUser(supabase, u, timezones.get(u.user_id) ?? 'UTC', now)
     } catch (err) {
       console.error(`dispatch failed for user ${u.user_id}:`, err)
     }
@@ -58,8 +69,13 @@ Deno.serve(async (req) => {
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function processUser(supabase: Supabase, u: any, now: Date): Promise<number> {
-  const tz: string = u.profiles?.timezone || 'UTC'
+async function processUser(
+  supabase: Supabase,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  u: any,
+  tz: string,
+  now: Date
+): Promise<number> {
   const local = getLocalParts(now, tz)
   const today = local.date
   let sent = 0
