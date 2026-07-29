@@ -220,7 +220,13 @@ export function TimeBlocksSection() {
   )
 }
 
-function TimeBlockForm({ block, onDone }: { block?: TimeBlock; onDone: () => void }) {
+export function TimeBlockForm({
+  block,
+  onDone,
+}: {
+  block?: TimeBlock
+  onDone: () => void
+}) {
   const [name, setName] = useState(block?.name ?? '')
   const [description, setDescription] = useState(block?.description ?? '')
   const [color, setColor] = useState(block?.color ?? SWATCHES[9])

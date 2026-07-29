@@ -261,11 +261,14 @@
 .fc .fc-list-event:hover td {
   background: color-mix(in oklab, var(--primary) 8%, transparent);
 }
+/* Time blocks: tint alpha is baked into the event color (CalendarPage), so
+   the element stays at full opacity and the label remains readable. */
 .fc .fc-bg-event {
-  opacity: 0.14;
+  opacity: 1;
 }
 .fc .fc-bg-event .fc-event-title {
-  @apply text-foreground/70 text-[10px] font-medium not-italic;
+  @apply text-foreground/85 text-[11px] font-semibold not-italic;
+  padding: 3px 6px;
 }
 .fc .fc-scrollgrid {
   border-left: 0;

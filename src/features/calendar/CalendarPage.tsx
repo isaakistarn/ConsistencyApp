@@ -4,7 +4,7 @@
  * slot to create a reminder prefilled with that date/time. Time blocks render
  * as tinted background events.
  */
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -16,6 +16,7 @@ import type {
   EventClickArg,
   EventDropArg,
   EventInput,
+  EventMountArg,
 } from '@fullcalendar/core'
 import type { EventResizeDoneArg } from '@fullcalendar/interaction'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -24,6 +25,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ResponsiveSheet } from '@/components/ResponsiveSheet'
 import { ReminderForm } from '@/features/reminders/ReminderForm'
+import { TimeBlockForm } from '@/features/settings/OrganizeSections'
 import {
   usePreferences,
   useReminders,
@@ -33,7 +35,7 @@ import {
 import { moveOccurrence } from '@/services/db/repositories/occurrences'
 import { useUiStore } from '@/store/ui'
 import { addDaysIso, toIsoDate } from '@/lib/dates'
-import type { CalendarView, Reminder } from '@/types'
+import type { CalendarView, Reminder, TimeBlock } from '@/types'
 
 export default function CalendarPage() {
   const calendarRef = useRef<FullCalendar>(null)
@@ -54,6 +56,14 @@ export default function CalendarPage() {
     start_date: string
     reminder_time: string | null
   } | null>(null)
+  const [editingBlock, setEditingBlock] = useState<TimeBlock | null>(null)
+  const timeBlocksRef = useRef(timeBlocks)
+  useEffect(() => {
+    timeBlocksRef.current = timeBlocks
+  }, [timeBlocks])
+  // Set while a pointer press started on a time block, so a plain click edits
+  // the block instead of also triggering the slot-select quick create.
+  const blockPressRef = useRef(false)
 
   const { data: occurrences = [] } = useResolvedRange(range.from, range.to, {
     includeSkipped: true,
@@ -78,6 +88,8 @@ export default function CalendarPage() {
     }))
 
     // Time blocks as recurring background events (daysOfWeek recurrence).
+    // The tint alpha lives in the color (not element opacity) so the title
+    // text stays fully readable on top of it.
     const blockEvents: EventInput[] = timeBlocks.map((b) => ({
       id: `block:${b.id}`,
       title: b.name,
@@ -85,8 +97,8 @@ export default function CalendarPage() {
       startTime: b.start_time,
       endTime: b.end_time <= b.start_time ? '23:59:59' : b.end_time,
       display: 'background',
-      backgroundColor: b.color,
-      extendedProps: { isBlock: true },
+      backgroundColor: /^#[0-9a-fA-F]{6}$/.test(b.color) ? `${b.color}2e` : b.color,
+      extendedProps: { isBlock: true, blockColor: b.color },
     }))
 
     return [...reminderEvents, ...blockEvents]
@@ -156,7 +168,58 @@ export default function CalendarPage() {
     [findReminder]
   )
 
+  // FullCalendar never fires eventClick for display:'background' events, so
+  // time blocks get their own DOM listeners. A press that stays put (< 8px)
+  // opens the block editor; a real drag falls through to slot selection.
+  const onEventDidMount = useCallback((info: EventMountArg) => {
+    const { isBlock, blockColor } = info.event.extendedProps as {
+      isBlock?: boolean
+      blockColor?: string
+    }
+    if (!isBlock) return
+    const el = info.el
+    el.style.cursor = 'pointer'
+    el.style.pointerEvents = 'auto'
+    if (blockColor) el.style.borderLeft = `3px solid ${blockColor}`
+    const blockId = info.event.id.slice('block:'.length)
+    let downX = 0
+    let downY = 0
+    el.addEventListener('pointerdown', (e) => {
+      downX = e.clientX
+      downY = e.clientY
+      blockPressRef.current = true
+      const onMove = (ev: PointerEvent) => {
+        if (Math.hypot(ev.clientX - downX, ev.clientY - downY) > 8) {
+          blockPressRef.current = false
+        }
+      }
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove)
+        window.removeEventListener('pointerup', onUp)
+        // Cleared async so FullCalendar's own pointerup (slot select) still
+        // sees the flag; the click handler below fires before this too.
+        setTimeout(() => {
+          blockPressRef.current = false
+        }, 0)
+      }
+      window.addEventListener('pointermove', onMove)
+      window.addEventListener('pointerup', onUp)
+    })
+    el.addEventListener('click', (e) => {
+      if (Math.hypot(e.clientX - downX, e.clientY - downY) > 8) return
+      const block = timeBlocksRef.current.find((b) => b.id === blockId)
+      if (block) {
+        setSlotDraft(null)
+        setEditingBlock(block)
+      }
+    })
+  }, [])
+
   const onSelect = useCallback((arg: DateSelectArg) => {
+    if (blockPressRef.current) {
+      blockPressRef.current = false
+      return
+    }
     setSlotDraft({
       start_date: toIsoDate(arg.start),
       reminder_time: arg.allDay
@@ -230,6 +293,7 @@ export default function CalendarPage() {
           }}
           datesSet={onDatesSet}
           eventClick={onEventClick}
+          eventDidMount={onEventDidMount}
           eventDrop={(arg) => void onEventDrop(arg)}
           eventResize={(arg) => void onEventResize(arg)}
           select={onSelect}
@@ -251,6 +315,19 @@ export default function CalendarPage() {
             onSaved={() => setSlotDraft(null)}
             onCancel={() => setSlotDraft(null)}
           />
+        ) : null}
+      </ResponsiveSheet>
+
+      {/* Tap a time block to edit it */}
+      <ResponsiveSheet
+        open={editingBlock !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditingBlock(null)
+        }}
+        title="Edit time block"
+      >
+        {editingBlock ? (
+          <TimeBlockForm block={editingBlock} onDone={() => setEditingBlock(null)} />
         ) : null}
       </ResponsiveSheet>
     </div>

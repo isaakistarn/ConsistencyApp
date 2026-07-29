@@ -1,7 +1,7 @@
 {
   "name": "consistency",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Mobile-first reminders, time blocking and consistency tracking PWA",
   "scripts": {
