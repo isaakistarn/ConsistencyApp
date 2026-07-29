@@ -352,7 +352,8 @@ export default function SettingsPage() {
       </Card>
 
       <p className="text-muted-foreground pb-4 text-center text-xs">
-        Consistency v1.0 · local-first · your data syncs when you are online
+        Consistency v{__APP_VERSION__} · local-first · your data syncs when you are
+        online
       </p>
     </div>
   )
