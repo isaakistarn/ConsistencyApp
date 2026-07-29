@@ -140,7 +140,7 @@ function CredentialsForm({ mode }: { mode: 'signin' | 'signup' }) {
           id={`${mode}-password`}
           type="password"
           autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-          placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+          placeholder="••••••••"
           {...register('password')}
         />
         {errors.password ? (
