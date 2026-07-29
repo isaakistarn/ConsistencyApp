@@ -43,6 +43,10 @@ export function Providers({ children }: { children: ReactNode }) {
           {children}
           <Toaster
             position="top-center"
+            // The app draws under the iOS status bar (viewport-fit=cover), so
+            // toasts must clear it — like a real notification banner would.
+            offset={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
+            mobileOffset={{ top: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
             toastOptions={{
               classNames: {
                 toast:

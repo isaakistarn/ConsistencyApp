@@ -238,6 +238,34 @@
 .fc .fc-event {
   @apply cursor-pointer rounded-md border-0 text-xs shadow-none;
   padding: 1px 4px;
+  overflow: hidden;
+}
+/* Keep event text inside its own cell — never bleeding into neighbors. */
+.fc .fc-daygrid-event-harness {
+  max-width: 100%;
+  overflow: hidden;
+}
+.fc .fc-daygrid-event .fc-event-title,
+.fc .fc-daygrid-event .fc-event-time {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fc .fc-timegrid-event .fc-event-title,
+.fc .fc-timegrid-event .fc-event-time {
+  overflow: hidden;
+}
+@media (max-width: 640px) {
+  .fc {
+    font-size: 0.72rem;
+  }
+  .fc .fc-event {
+    padding: 1px 3px;
+  }
+  .fc .fc-timegrid-slot-label,
+  .fc .fc-daygrid-day-number {
+    font-size: 0.68rem;
+  }
 }
 .fc .fc-event.occ-completed {
   opacity: 0.45;
@@ -265,6 +293,7 @@
    the element stays at full opacity and the label remains readable. */
 .fc .fc-bg-event {
   opacity: 1;
+  overflow: hidden;
 }
 .fc .fc-bg-event .fc-event-title {
   @apply text-foreground/85 text-[11px] font-semibold not-italic;
